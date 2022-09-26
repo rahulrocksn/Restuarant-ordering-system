@@ -1,0 +1,191 @@
+{% extends "chewapp/BasicAdminTemplate.html"%}
+{% comment %} 
+Description: 
+Shows the totals visits per day/week/month
+
+
+Expected Context:
+username: "admin101",
+profile: "admin",
+tabs: getTabsOwner(request, "# visits"),
+activeTab: "# visits",
+GetDataMode: GetDataMode,
+YearSelected: year,
+Years: getYearRange(),
+MonthSelected: month,
+Months: getMonthRange(),
+WeekSelected: week,
+Weeks: weeks,
+Data: [1,2,3,4,5].. etc
+
+{% endcomment %}
+{% block content %}
+
+<div class="row">
+    <div class="col">
+        <select class="form-select date-select" aria-label="Year select option" name="Year" id="YearSelectTag">
+            {% for Year in Years %}
+            <option value="{{Year}}" {% if Year == YearSelected %} selected {% endif %} >{{Year}}</option>
+            {% endfor %}
+          </select>
+    </div>
+    <div class="col">
+        <select class="form-select date-select" aria-label="Month select option" name="Month" id="MonthSelectTag">
+            <option {% if not MonthSelected %} selected {% endif %} value="">-</option>
+            {% for Month in Months %}
+            <option value="{{Month.value}}" {% if MonthSelected == Month.value %}selected{% endif %}>{{Month.name}}</option>
+            {% endfor %}
+          </select>
+    </div>
+    <div class="col">
+        <select class="form-select date-select" aria-label="Week select option" name="Week" id="WeekSelectTag">
+            <option {% if not WeekSelected %} selected {% endif %} value="">-</option>
+            {% for Week in Weeks %}
+            <option value="{{Week.week}}" {% if WeekSelected == Week.week %} selected {%endif%}>Week {{Week.week}}: {{Week.start_date.day}}/{{Week.start_date.month}} - {{Week.end_date.day}}/{{Week.end_date.month}}</option>
+            {% endfor %}
+          </select>
+    </div>
+</div>
+
+
+<div class="row" style="max-height:calc(100vh - 350px)">
+    <canvas id="myChart" width="400" height="400" ></canvas>
+</div>
+
+{% comment %} ChartJS {% endcomment %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" crossorigin="anonymous"></script>
+<link href="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.css" rel="stylesheet" crossorigin="anonymous">
+<script>
+
+    let backgroundColor = [];
+    let borderColor = [];
+    let labels = [];
+
+    const YearColors = [
+        'rgba(17, 75, 95,0.2)',
+        'rgba(69, 105, 144,0.2)',
+        'rgba(157, 98, 125,0.2)',
+        'rgba(201, 95, 115,0.2)',
+        'rgba(223, 93, 110,0.2)',
+        'rgba(244, 91, 105,0.2)',
+        'rgba(176, 65, 80,0.2)',
+        'rgba(142, 52, 68,0.2)',
+        'rgba(120, 59, 73,0.2)',
+        'rgba(125, 46, 62,0.2)',
+        'rgba(107, 39, 55,0.2)',
+        'rgba(132, 77, 90,0.2)',
+    ]
+    
+    const YearBorderColors = [
+        'rgba(17, 75, 95,1)',
+        'rgba(69, 105, 144,1)',
+        'rgba(157, 98, 125,1)',
+        'rgba(201, 95, 115,1)',
+        'rgba(223, 93, 110,1)',
+        'rgba(244, 91, 105,1)',
+        'rgba(176, 65, 80,1)',
+        'rgba(142, 52, 68,1)',
+        'rgba(120, 59, 73,1)',
+        'rgba(125, 46, 62,1)',
+        'rgba(107, 39, 55,1)',
+        'rgba(132, 77, 90,1)',
+    ]
+
+    const MonthColors = [
+        'rgba(95, 15, 64,0.2)',
+        'rgba(154, 3, 30,0.2)',
+        'rgba(251, 139, 36,0.2)',
+        'rgba(227, 100, 20,0.2)',
+        'rgba(15, 76, 92,0.2)',
+        'rgba(37, 92, 107,0.2)',
+    ]
+
+    const MonthBorderColors = [
+        'rgba(95, 15, 64,1)',
+        'rgba(154, 3, 30,1)',
+        'rgba(251, 139, 36,1)',
+        'rgba(227, 100, 20,1)',
+        'rgba(15, 76, 92,1)',
+        'rgba(37, 92, 107,1)',
+    ]
+
+    const WeekColors = [
+        'rgba(61, 52, 139,0.2)',
+        'rgba(118, 120, 237,0.2)',
+        'rgba(183, 152, 119,0.2)',
+        'rgba(247, 184, 1,0.2)',
+        'rgba(244, 160, 1,0.2)',
+        'rgba(241, 135, 1,0.2)',
+        'rgba(243, 91, 4,0.2)',
+    ]
+
+    const WeekBorderColors = [
+        'rgba(61, 52, 139,1)',
+        'rgba(118, 120, 237,1)',
+        'rgba(183, 152, 119,1)',
+        'rgba(247, 184, 1,1)',
+        'rgba(244, 160, 1,1)',
+        'rgba(241, 135, 1,1)',
+        'rgba(243, 91, 4,1)',
+    ]
+
+    if ("{{GetDataMode}}" == "Year"){
+        backgroundColor = YearColors
+        borderColor = YearBorderColors
+        labels = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    }
+    else if ("{{GetDataMode}}" == "Month"){
+        backgroundColor = MonthColors
+        borderColor = MonthBorderColors
+        {% for Week in Weeks %}
+        labels.push("Week {{Week.week}}: {{Week.start_date.day}}/{{Week.start_date.month}} - {{Week.end_date.day}}/{{Week.end_date.month}}")
+        {% endfor %}
+    }
+    else if ("{{GetDataMode}}" == "Week"){
+        backgroundColor = WeekColors
+        borderColor = WeekBorderColors
+        labels = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    }
+
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Visits Per {{GetDataMode}}',
+                data: {{Data}},
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+<script>
+    $(document).ready(
+        function(){
+            $(".date-select").change(
+                function(){
+                    var Year = $("#YearSelectTag").val();
+                    var Month = $("#MonthSelectTag").val();
+                    var Week = $("#WeekSelectTag").val();
+                    window.location.href = "{% url "ownerNumberOfVisits" %}?Year="+Year+"&Month="+Month+"&Week="+Week;
+                }
+            );
+
+
+        }
+    )
+
+</script>
+
+{% endblock content %}

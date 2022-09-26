@@ -1,0 +1,20 @@
+{% extends "chewapp/GuestViewMenuTemplates.html"%}
+{% load static %}
+{% comment %} 
+Description: Just loads a basic error screen based on context ERROR.
+
+Expected Context:
+errorMsg
+TableNo
+
+{% endcomment %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            ERROR: {{ errorMsg }}
+        </div>
+    </div>
+</div>
+{% endblock %}

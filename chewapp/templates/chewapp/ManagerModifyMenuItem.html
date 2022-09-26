@@ -1,0 +1,138 @@
+{% extends "chewapp/ModifyItemTemplate.html"%}
+
+{% comment %} 
+Expected Context: 
+
+TitleText: string
+Name: string
+Price: float
+Description: string
+OutOfStock: boolean
+{% endcomment %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-md-12">
+
+    </div>
+
+</div>
+
+<form id="ModifyData">
+
+
+<input type="hidden" name="itemId" value="{{itemId}}" id="itemId">
+
+
+<div class="row p-4">
+    <div class="col-4">
+        <label for="Name" class="align-middle" style="line-height: 40px;">Current Image:</label>
+    </div>
+    <div class="col-8">
+        <img src="{{img}}" alt="{{itemName}}" class="img-fluid" style="max-height: 200px;">
+        <br>
+        <br>
+        <label for="Picture">Upload new picture:</label><input type="file" id="Picture" name="Picture">
+    </div>
+</div>
+
+<div class="row p-4">
+    <div class="col-4">
+        <label for="Name" class="align-middle" style="line-height: 40px;">Item Name:</label>
+    </div>
+    <div class="col-8">
+        <input type="text" class="form-control " id="Name" placeholder="Enter name" value="{{Name}}" style="height: 40px;" required>
+    </div>
+</div>
+
+<div class="row p-4">
+    <div class="col-4">
+        <label for="Price" class="align-middle" style="line-height: 40px;">Price:</label>
+    </div>
+    <div class="col-8">
+        <input type="text" class="form-control " id="Price" name="Price" placeholder="Enter Price" value="{{Price}}" style="height: 40px;" required>
+    </div>
+</div>
+
+<div class="row p-4">
+    <div class="col-4">
+        <label for="Description" class="align-middle" style="line-height: 40px;">Description:</label>
+    </div>
+    <div class="col-8">
+        <textarea class="form-control " id="Description" placeholder="Enter Description" name="Description" rows="7">{{Description}}</textarea>
+    </div>
+</div>
+
+<div class="row p-4">
+    <div class="col-4">
+        <label for="StockStatus" class="align-middle" >In Stock:</label>
+    </div>
+    <div class="col-8">
+        <input type="checkbox" id="StockStatus" name="OutOfStock" value="True" {% if OutOfStock %}checked{% endif %}>
+    </div>
+</div>
+
+</form>
+
+<div class="alert alert-secondary invisible" id="modalAlert" role="alert">
+    Editing...
+</div>
+
+<div class="row p-4">
+    <div class="col-12">
+        <button type="button" class="btn btn-success" style="float:right" id="saveButton" >Save</button>
+
+    </div>
+</div>
+
+
+
+<script>
+
+    console.log( "{% url 'managerMenu' %}" + $('#itemId').val() )
+
+    $(document).ready( function () {
+        $('#saveButton').click( function(){
+
+            
+            var formData = new FormData()
+            
+            var file_data = $('#Picture').prop('files')[0]
+            formData.append('Picture', file_data)
+            formData.append('Name', $('#Name').val())
+            formData.append('Price', $('#Price').val())
+            formData.append('Description', $('#Description').val())
+            formData.append('StockStatus', $('#StockStatus').is(':checked'))
+
+            // url of the data that is to be delete
+            $('#modalAlert').removeClass('invisible')
+            $.ajax({
+                url : "{% url 'managerMenu' %}" + $('#itemId').val() + '/',
+                headers: { "X-CSRFToken": getCookie("csrftoken")},
+                processData: false,
+                contentType: false,
+                type : 'POST',
+                data : formData,
+                success : function(data){
+                    console.log("yay")
+                    $('#modalAlert').removeClass('alert-secondary')
+                    $('#modalAlert').addClass('alert-success')
+                    $('#modalAlert').html('Modified Successfully. Returning to menu...')
+                    setTimeout(function(){window.location.href = "{% url 'managerMenu' %}"}, 1000)
+        
+                },
+                error: function(xhr, error){
+                    $('#modalAlert').removeClass('alert-secondary')
+                    $('#modalAlert').addClass('alert-danger')
+                    $('#modalAlert').html('Failed to Modify ' + error)
+                }
+            });
+        });
+      });
+
+</script>
+
+
+{% endblock %}

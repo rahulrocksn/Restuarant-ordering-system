@@ -1,0 +1,122 @@
+{% extends "chewapp/ModifyItemTemplate.html"%}
+
+{% comment %} 
+Expected Context: 
+
+TitleText: string
+Name: string
+{% endcomment %}
+
+{% block content %}
+
+<form id="ModifyCategoriesForm">
+
+<div class="row">
+
+    <div class="col-md-12">
+
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-auto" style="margin: 5px; padding-left: 50px;">
+        <label class="form-label">Category Name: </label>
+    </div>
+    <div class="col-7">
+        <input type="text" class="form-control " id="Name" placeholder="Enter category name" value="{{Name}}" style="height: 40px;" required>
+    </div>
+</div>
+<div class="row" >
+    <div class="col-3" style="margin: 5px; padding-left: 50px;">
+        <label class="form-label">Description: </label>
+    </div>
+    <div class="col-7">
+        <textarea class="form-control" id="description" rows="3" name="description">{{desc}}</textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="col-20" style="margin: 5px; padding-left: 50px; padding-top: 40px;">
+        <label class="form-label">Select Menu Items: </label>
+    </div>
+    <div class="col-30" style="padding-left: 200px;">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" style="width: 50%" aria-expanded="false">
+                Select items
+        </button>
+
+        <ul class="dropdown-menu">
+            {% for MenuItem in MenuItems %}
+            <li>
+                <input class="form-check-input" type="checkbox" class="AllTheCheckBoxes" value="{{MenuItem.ID}}" id="{{MenuItem.ID}}" {% if MenuItem.Selected %}checked{% endif %} >
+                <label class="form-check-label">{{MenuItem.Name}}</label>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+</form>
+
+
+<div class="alert alert-secondary invisible" id="modalAlert" role="alert">
+    Editing...
+</div>
+
+<div class="row p-4">
+    <div class="col-12">
+        <button type="button" class="btn btn-success" style="float:right" id="saveButton" >Save</button>
+
+    </div>
+</div>
+
+
+
+<script>
+
+    $(document).ready( function () {
+        $('#saveButton').click( function(){
+
+            if (!document.forms['ModifyCategoriesForm'].reportValidity()){
+                alert("Please fill out all fields");
+                return;
+            }
+                
+            // Getting all the IDs
+            let MenuIDs = []
+            $("input:checked").each(function() { MenuIDs.push(this.id);})
+
+            // url of the data that is to be delete
+            $('#modalAlert').removeClass('invisible')
+            $.ajax({
+                url : "{% url 'managerCategory' %}modify/{{CID}}" ,
+                headers: { "X-CSRFToken": getCookie("csrftoken"),
+                        'Accept' : 'application/json',
+                        'Content-Type' : 'application/json'},
+                type : 'PATCH',
+                data : JSON.stringify({
+                    "Name" : $('#Name').val(),
+                    "description": $('#description').val(),
+                    "MenuItems" : MenuIDs
+                }),
+                success : function(data){
+                    console.log("yay")
+                    $('#modalAlert').removeClass('alert-secondary')
+                    $('#modalAlert').addClass('alert-success')
+                    $('#modalAlert').html('Modified Successfully. Returning to menu...')
+                    setTimeout(function(){window.location.href = "{% url 'managerCategory' %}"}, 1000)
+
+        
+                },
+                error: function(xhr, error){
+                    $('#modalAlert').removeClass('alert-secondary')
+                    $('#modalAlert').addClass('alert-danger')
+                    $('#modalAlert').html('Failed to Modify ' + error)
+                }
+            });
+        });
+      });
+
+</script>
+
+
+{% endblock %}

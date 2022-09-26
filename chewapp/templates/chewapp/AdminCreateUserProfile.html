@@ -1,0 +1,95 @@
+{% extends "chewapp/BasicModifyTemplate.html"%}
+
+{% comment %} 
+Description: 
+Create a User Profile Page
+
+
+Expected Context:
+TitleText
+
+Error: optional
+
+
+{% endcomment %}
+
+
+{% block content %}
+
+<div class="container">
+    <form action="" method="post" class="p-3" name="UserProfiles" onsubmit="return validateForm()">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-12">
+                <label class="form-label" for="RoleName"><h5>Role Name:</h5></label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <input type="text" class="form-control" name="RoleName" id="RoleName" required>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-12 ">
+                <h5>Permissions:</h5>
+                    <input type="checkbox" class="form-check-input" name="Staff" id="Staff"></input>
+                    <label for="Staff">Staff</label>
+                    <br>    
+                    <input type="checkbox" class="form-check-input" name="Admin" id="Admin"></input>
+                    <label for="Admin">Admin</label>
+                    <br>
+                    <input type="checkbox" class="form-check-input" name="Manager" id="Manager"></input>
+                    <label for="Manager">Manager</label>
+                    <br>
+                    <input type="checkbox" class="form-check-input" name="Owner" id="Owner"></input>
+                    <label for="Owner">Owner</label>
+                    <br>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="alert alert-danger invisible" id="PermissionAlert" role="alert">
+                Select at least 1 permission!
+              </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-outline-success w-50">Create Account</button>
+            </div>
+        </div>
+
+        {% if Error %}        
+        <div class="row mt-2 "> 
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
+                    {{Error}}
+                  </div>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+    function validateForm() {
+
+        let Staff = (document.forms["UserProfiles"]["Staff"].checked == true)
+        let Admin = (document.forms["UserProfiles"]["Admin"].checked == true)
+        let Manager = (document.forms["UserProfiles"]["Manager"].checked == true)
+        let Owner = (document.forms["UserProfiles"]["Owner"].checked == true)
+
+        if (Staff || Admin || Manager || Owner){
+            return true;
+        }
+        else{
+            $("#PermissionAlert").removeClass("invisible");
+            $("#PermissionAlert").addClass("visible");
+
+            return false;
+        }
+
+    }
+
+</script>
+
+{% endblock content %}
+

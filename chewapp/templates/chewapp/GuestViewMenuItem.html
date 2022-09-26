@@ -1,0 +1,52 @@
+{% extends "chewapp/GuestViewMenuTemplates.html"%}
+{% load static %}
+{% comment %} 
+Description: 
+Viewing a selected item from the homepage
+
+Expected Context:
+Item:{
+        "MenuItemID": "0",
+        "Name": "Curry",
+        "Price": "4.5",
+        "Description": "Curry is a dish of cooked curry leaves.",
+        "Image": "curry.jpg",
+        "IsAvailable": True,
+}
+TableNo: request.session["Table"]
+CartSize: 5
+{% endcomment %}
+
+{% block content %}
+
+<div class="container mt-5">
+    {% if not ErrorMsg %}    
+    <div class="row">
+        <div class="col-12">
+            <img src="{{ Item.Image }}" alt="Photo of Food" class="img-fluid img-thumbnail rounded">
+        </div>
+    </div>
+    <div class="row mt-1">
+        <div class="col-12">
+            <h2>{{ Item.Name }} (${{Item.Price|floatformat:2}})</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">{{Item.Description}}</div>
+    </div>
+    <div class="row mt-5">
+        {% if Item.IsAvailable %}
+            <div class="col-12 d-grid""><button class="btn btn-outline-success addToCartButton" data-bs-id="{{Item.MenuItemID}}">Add</button></div>
+        {% else %}
+            <div class="col-12 d-grid""><button class="btn btn-danger disabled">Out of Stock</button></div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            {{ ErrorMsg }}
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

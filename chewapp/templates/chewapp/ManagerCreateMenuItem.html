@@ -1,0 +1,82 @@
+{% extends "chewapp/ModifyItemTemplate.html"%}
+
+{% comment %} 
+Expected Context: 
+
+TitleText: string
+{% endcomment %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-md-12">
+
+    </div>
+
+</div>
+
+<div class="container">
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %} 
+    
+    <div class="row p-4">
+        <div class="col-4">
+            <label for="Name" class="align-middle" style="line-height: 40px;">Item Name:</label>
+        </div>
+        <div class="col-8">
+            <input type="text" class="form-control " id="Name" name="Name" placeholder="Enter name" style="height: 40px;" required>
+        </div>
+    </div>
+    
+    <div class="row p-4">
+        <div class="col-4">
+            <label for="Price" class="align-middle" style="line-height: 40px;">Price:</label>
+        </div>
+        <div class="col-8">
+            <input type="text" class="form-control " id="Price" name="Price" placeholder="Enter Price" value="" style="height: 40px;" required>
+        </div>
+    </div>
+    
+    <div class="row p-4">
+        <div class="col-4">
+            <label for="Description" class="align-middle" style="line-height: 40px;">Description:</label>
+        </div>
+        <div class="col-8">
+            <textarea class="form-control " id="Description" name="Description" placeholder="Enter Description"  rows="7"></textarea>
+        </div>
+    </div>
+
+    <div class="row p-4">
+        <div class="col-4">
+            <label for="Picture" class="align-middle" style="line-height: 40px;">Picture:</label>
+        </div>
+        <div class="col-8">
+            <input type="file" id="Picture" name="Picture">
+        </div>
+    </div>
+
+    
+    <div class="row p-4">
+        <div class="col-4">
+            <label for="StockStatus" class="align-middle" >In Stock:</label>
+        </div>
+        <div class="col-8">
+            <input type="checkbox" id="StockStatus" name="StockStatus" value="True" >
+        </div>
+    </div>
+
+    
+    <div class="row p-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-success" style="float:right" id="saveButton" >Save</button>
+    
+        </div>
+    </div>
+    
+    </form>
+</div>
+
+
+{% endblock %}

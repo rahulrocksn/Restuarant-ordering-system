@@ -1,0 +1,31 @@
+{% extends "chewapp/BasicTemplateForStaff.html"%}
+
+{% block content %}
+
+    <div class="container" style="overflow-y: scroll; max-height:60vh;" >
+        {% if orders %}
+            {% for order in orders %}
+              <a href="{{order.orderID}}" style="color: inherit; text-decoration: inherit">
+                <div class="row pt-3 pb-3 border-bottom">
+                    <div class="col-7 align-self-center">
+                        <p>Order No.: #{{ order.Number }}</p>
+                        <p>Order Time: {{order.Time}}</p>
+                    </div>
+                    <div class="col-5">
+                      <p class="text-end mb-0" style="font-size: 16px">TABLE</p>
+                      <p class="text-end {% if order.table_no > 9 %}pe-2{% else %}pe-3{% endif %}" style="font-size: 28px">{{order.table_no}}</p>
+                    </div>
+                </div>
+              </a>
+            {% endfor %}
+        {% else %}
+            <div class="row">
+                <div class="col-md-12">
+                    <h6 class="text-center">≧◉ᴥ◉≦</h6>
+                    <h6 class="text-center">Nothing here!</h6>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

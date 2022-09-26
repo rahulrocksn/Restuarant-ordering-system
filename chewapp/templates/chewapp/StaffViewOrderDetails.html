@@ -1,0 +1,109 @@
+{% extends "chewapp/StaffViewOrderDetailsTemplate.html"%}
+{% load static %}
+
+{% block content %}
+<h1 class="pt-4">Order List</h1>
+<h6>Total {{order.number_of_items}} items</h6>
+<div class="container" style="overflow-y: scroll; max-height:70vh;" >
+    {% for item in OrderItems %}
+        <div class="row pt-3 pb-3 border-bottom">
+            <div class="col-7 align-self-center">
+                <h5>{{ item.Name }} x {{item.Qty}}</h5>
+                <p>${{ item.Price }} each.</p>
+            </div>
+            <div class="col-5">
+                <div class="d-grid gap-2 mr-1" style="float:right">
+                    
+                    {% if item.Status == 1 %}
+                    <form method="post" action="{% url "staffOrderItem" %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="item_id" value="{{ item.MenuItemID }}" />
+                      <input type="hidden" name="step" value="2" />
+                      <button class="btn btn-outline-primary" type="submit">Prepare</button>
+                    </form>
+                    <div class="row">
+                      <div class="col pe-0">
+                        <form method="post" action="{% url "staffOrderItemQty" %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="item_id" value="{{ item.MenuItemID }}" />
+                          <input type="hidden" name="qty" value="{{item.Qty}}" />
+                          <input type="hidden" name="operation" value="minus" />
+                          <button class="btn btn-primary" type="submit">-</button>
+                        </form>
+                      </div>
+                      <div class="col px-0 text-center pt-1">{{item.Qty}}</div>
+                      <div class="col ps-0">
+                        <form method="post" action="{% url "staffOrderItemQty" %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="item_id" value="{{ item.MenuItemID }}" />
+                          <input type="hidden" name="qty" value="{{item.Qty}}" />
+                          <input type="hidden" name="operation" value="add" />
+                          <button class="btn btn-primary" type="submit">+</button>
+                        </form>
+                      </div>
+                    </div>
+                    
+                    <form method="post" action="{% url "staffOrderItem" %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="item_id" value="{{ item.MenuItemID }}" />
+                      <input type="hidden" name="step" value="5" />
+                      <button class="btn btn-danger" type="submit">⤫ Cancel</button>
+                    </form>
+                    {% endif %}
+                    {% if item.Status == 2 %}
+                    <h6>🍳 Preparing</h5>
+                    <form method="post" action="{% url "staffOrderItem" %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="item_id" value="{{ item.MenuItemID }}" />
+                      <input type="hidden" name="step" value="3" />
+                      <button class="btn btn-success" type="submit">Mark as Ready</button>
+                    </form>
+                    {% endif %}
+                    {% if item.Status == 3 %}
+                    <form method="post" action="{% url "staffOrderItem" %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="item_id" value="{{ item.MenuItemID }}" />
+                      <input type="hidden" name="step" value="4" />
+                      <button class="btn btn-outline-success" type="submit">Serve</button>
+                    </form>
+                    {% endif %}
+                    {% if item.Status == 4 %}
+                    <h6 class="text-success">✅ Completed</h5>
+                    {% endif %}
+                    {% if item.Status == 5 %}
+                    <h6 class="text-danger">❌ Cancelled</h5>
+                    {% endif %}
+                </div>
+            </div>
+            
+        </div>
+
+
+    {% endfor %}
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">New message</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h5>Are you sure you want to cancel this item?</h5>
+        <h5>Item: <span></span></h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger">Cancel Item</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row pb-2" style="position: absolute; bottom: 0;">
+    <div class="col">
+        <h2>Total: ${{order.total_price}}</h2>
+    </div>
+</div>
+
+{% endblock %}

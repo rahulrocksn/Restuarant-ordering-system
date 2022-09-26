@@ -1,0 +1,31 @@
+#DontOverScroll {
+  height: calc(100vh - 350px);
+}
+
+#DontOverScrollCart {
+  height: calc(100vh - 300px);
+}
+
+#DontOverScrollGuestMenu {
+  height: calc(100vh - 200px);
+}
+
+@media only screen and (min-width: 800px) {
+  #MainContainer {
+    position: relative;
+    top: 5vh;
+    box-shadow: 0 0 20px 8px #d0d0d0;
+    height: 95vh;
+    max-width: 750px;
+  }
+  #DontOverScroll {
+    height: calc(100vh - 420px);
+  }
+  #DontOverScrollCart {
+    height: calc(100vh - 380px);
+  }
+
+  #DontOverScrollGuestMenu {
+    height: calc(100vh - 250px);
+  }
+}

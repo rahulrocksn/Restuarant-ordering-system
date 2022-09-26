@@ -1,0 +1,33 @@
+#MainContainer input,
+label,
+h1 {
+  width: 100%;
+}
+
+#MainContainer button {
+  margin: 0 auto;
+  display: block;
+}
+
+#MainContainer {
+  box-shadow: 0 0 20px 8px #d0d0d0;
+}
+
+@media only screen and (min-width: 800px) {
+  #CartOutContainer {
+    position: relative;
+    top: 5vh;
+    box-shadow: 0 0 20px 8px #d0d0d0;
+    height: 95vh;
+    max-width: 750px;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media only screen and (max-width: 799px) {
+  #CartOutContainer {
+    align-items: center;
+    justify-content: center;
+  }
+}

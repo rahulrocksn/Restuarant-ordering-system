@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+{% load static%}
+{% comment %} 
+Description: 
+The inital screen the person sees when he loads the menu and types in his email and table number
+
+Expected Context:
+Table (though might be empty)
+Email
+
+{% endcomment %}
+<html>
+    <head>
+        <!-- CSS only -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="{% static 'chewapp/guest.css' %}">
+        <title>{{Title}}</title>
+    </head>
+
+    <body style="height: 100vh; width: 100%; overflow:hidden; display: flex;justify-content: center; align-items: center;">
+        <form method="post">
+            {% csrf_token %} 
+            <div class="container-sm p-5" id="MainContainer" style="max-width: 500px;">
+                <div class="row pr-2 pl-2 pb-5 pt-2">
+                    <div class="col-12 p-2 text-center">
+                        <h1>Chewsters</h1>
+                    </div>
+                </div>
+                <div class="row p-2">
+                    <div class="col-12 ">
+                        <label for="Table" class="text-center"><h3 class="text-center">What is your table number?</h3></label>
+                    </div>
+                </div>
+                <div class="row p-2">
+                    <div class="col-12">
+                        <input type="number" name="Table" id="Table" placeholder="Table Number" value="{{Table}}" min='1' max='20'>
+                    </div>
+                </div>
+                <div class="row p-2 pt-5">
+                    <div class="col-12">
+                        <label for="Email" class="text-center"><h3 class="text-center">What is your Email?</h3></label>
+                    </div>
+                </div>
+                <div class="row p-2">
+                    <div class="col-12">
+                        <input type="email" name="Email" id="Email" placeholder="Email" value="{{Email}}">
+                    </div>
+                </div>
+                <div class="row pt-5">
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn btn-primary">Let's go!</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </body>
+</html>

@@ -1,0 +1,128 @@
+{% extends "chewapp/ModifyItemTemplate.html"%}
+
+{% block content %}
+
+<form id="ModifyCouponCodeForm" >
+
+<div class="row">
+
+    <div class="col-md-12">
+
+    </div>
+
+<input type="hidden" name="CID" value="{{CID}}" id="CID">
+
+<div class="row">
+    <div class="col-3" style="margin: 5px; padding-left: 50px;">
+        <label class="form-label">Coupon Code: </label>
+    </div>
+    <div class="col-7">
+        <input class="form-control" id="coupon" placeholder="Enter coupon code name" value="{{Coupon}}" style="height: 40px;" required>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-20" style="margin: 5px; padding-left: 50px; padding-top: 40px;">
+        <label class="form-label">Enter discount as: </label>
+    </div>
+</div>
+
+<div class="row" style="padding-left: 8%">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="PercentOrValue" id="percentRadio" value="DiscountIsPercent" {% if DiscountP%}checked{% endif %}>
+        <label class="form-check-label" for="percentRadio">
+             Percentage (%)
+        </label>
+    </div>
+</div>
+
+<div class="row" style="padding-left: 8%">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="PercentOrValue" id="valueRadio" value="DiscountIsValue" {% if DiscountV %}checked{% endif %}>
+        <label class="form-check-label" for="valueRadio">
+             Value ($)
+        </label>
+    </div>
+</div> 
+
+<div class="row" style="padding-top: 10px ;">
+    <div class="col-3" style="margin: 5px; padding-left: 50px;">
+        <label class="form-label">Discount: </label>
+    </div>
+    <div class="col-7">
+        <input class="form-control" id="DiscountNumber" required placeholder="Enter discount" value="{% if DiscountP %}{{DiscountP}}{% else %}{{DiscountV}}{% endif %}" style="height: 40px;">
+    </div>
+</div>
+
+<div class="row">
+        <div class="col-20" style="margin: 5px; padding-left: 50px; padding-top: 40px;">
+            <label class="form-label">Minimum Spend: </label>
+        </div>
+</div>
+
+
+<div class="row" style="padding-left: 6%; padding-top: 2%;">
+    <div class='col-4' id="minspend"> 
+        <input class='form-control' id='amount' placeholder='Enter min spend value' value="{{MinAmt}}">
+    </div>
+</div>
+
+
+<div class="alert alert-secondary invisible" id="modalAlert" role="alert">
+    Editing...
+</div>
+
+<div class="row p-4">
+    <div class="col-12">
+        <button type="button" class="btn btn-success" style="float:right" id="saveButton" >Save</button>
+
+    </div>
+</div>
+
+</form>
+
+
+<script>
+
+    $(document).ready( function () {
+        $('#saveButton').click( function(){
+
+            if (!document.forms['ModifyCouponCodeForm'].reportValidity()){
+                alert("Please fill out all fields");
+                return;
+            }
+            // url of the data that is to be delete
+            $('#modalAlert').removeClass('invisible')
+            $.ajax({
+                url : "{% url 'managerCouponCodeModify' CID=CID %}",
+                headers: { "X-CSRFToken": getCookie("csrftoken"),
+                        'Accept' : 'application/json',
+                        'Content-Type' : 'application/json'},
+                type : 'PATCH',
+                data : JSON.stringify({
+                    "CID" : $('#CID').val(),
+                    "Coupon" : $('#coupon').val(),
+                    "DiscountType" : $("input[name='PercentOrValue']:checked").val(),
+                    "DiscountNumber" : $('#DiscountNumber').val(),
+                    "MinAmt" : $('#amount').val()
+                }),
+                success : function(data){
+                    console.log("yay")
+                    $('#modalAlert').removeClass('alert-secondary')
+                    $('#modalAlert').addClass('alert-success')
+                    $('#modalAlert').html('Modified Successfully. Returning to menu...')
+                    setTimeout(function(){window.location.href = "{% url 'managerCouponCode' %}"}, 1000)
+        
+                },
+                error: function(xhr, error){
+                    $('#modalAlert').removeClass('alert-secondary')
+                    $('#modalAlert').addClass('alert-danger')
+                    $('#modalAlert').html('Failed to Modify ' + error)
+                }
+            });
+        });
+      });
+
+</script>
+
+{% endblock %}

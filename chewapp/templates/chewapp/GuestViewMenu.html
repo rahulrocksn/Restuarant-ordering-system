@@ -1,0 +1,71 @@
+{% extends "chewapp/GuestViewMenuTemplates.html"%} {% load static %} 
+
+{% comment %} 
+Description: 
+The homepage, all the menu items.
+
+Expected Context:
+ItemsInSelectedCategory : {
+    MenuItemID : "",
+    Name:"",
+    Qty:"",
+    Price:"",
+}
+TableNo
+Categories
+SearchTerm
+
+{% endcomment %}
+
+{% block content %} 
+
+    {% for FoodItem in ItemsInSelectedCategory %}
+
+    <a
+    href="{{FoodItem.MenuItemID}}"
+    style="color: inherit; text-decoration: inherit"
+    >
+        <div class="row">
+            <div class="col-3 gx-0">
+            <img
+                src="{{ FoodItem.Image }}"
+                class="img-thumbnail"
+                alt="Responsive image"
+                style="object-fit: cover"
+            />
+            </div>
+            <div class="col-9 gx-1">
+            <div class="container">
+                <div class="row">
+                <div class="col-12">
+                    <h5>{{ FoodItem.Name }} (${{FoodItem.Price|floatformat:2}})</h5>
+                </div>
+                </div>
+                <div class="row">
+                <div class="col-12">{{ FoodItem.Description }}</div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </a>
+    <div class="row mb-3 border-bottom">
+        <div class="col-12" style="margin-bottom: 10px">
+            {% if FoodItem.IsAvailable %}
+            {% comment %} 
+            For add to cart button to work, it needs to have the class addToCartButton and the following bs-id for 
+            jQuery to pick up and do the magic.
+            {% endcomment %}
+            <button type="button" class="btn btn-outline-success float-end addToCartButton" data-bs-id="{{ FoodItem.MenuItemID }}">
+                Add to Cart
+            </button>
+            {% else %}
+            <button type="button" class="btn btn-outline-danger float-end disabled">
+                Sold Out
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    {% endfor %} 
+
+{% endblock %}

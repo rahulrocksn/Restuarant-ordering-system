@@ -1,0 +1,134 @@
+{% extends "chewapp/BasicModifyTemplate.html"%}
+
+{% comment %} 
+Description: 
+Create a User Account
+
+
+Expected Context:
+TitleText
+ID : User account ID
+Email
+Username
+CurrentProfile
+Profiles:[{
+    id:"1",
+    name:"Profile 1",
+}]
+Error: optional
+
+
+{% endcomment %}
+
+
+{% block content %}
+
+<div class="container">
+    <form action="" method="post" class="p-3" name="UserAccounts" onsubmit="return validateForm()">
+        <input type="hidden" id="ID" name="ID" value="{{ID}}">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-12">
+                <label class="form-label" for="Email"><h5>Email:</h5></label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <input type="email" class="form-control" name="Email" id="Email" placeholder="name@example.com" value="{{Email}}" required>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-12">
+                <label for="Username">
+                    <h5>Username:</h5>
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <input type="text" class="form-control" name="Username" id="Username" placeholder="Username" value="{{Username}}" required>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-12">
+                <label for="Password">
+                    <h5>Password:</h5>
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <input type="password" class="form-control" name="Password" id="Password" placeholder="Password (leave blank if no change)" >
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-12">
+                <label for="ConfirmPassword">
+                    <h5>Confirm Password:</h5>
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <input type="password" class="form-control" name="ConfirmPassword" id="ConfirmPassword" placeholder="Confirm Password" >
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12">
+                <label for="Profile">
+                    <h5>Select Profile:</h5>
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <select class="form-select" aria-label="Select Profile" name="Profile">
+                    {% for Profile in Profiles %}
+                    <option value="{{Profile.id}}" {% if CurrentProfile == Profile.id %} selected {% endif %}>{{Profile.name}}</option>
+                    {% endfor %}
+                  </select>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-outline-success w-50">Modify Account</button>
+            </div>
+        </div>
+        {% if Error %}        
+        <div class="row mt-5 "> 
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
+                    {{Error}}
+                  </div>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+    function validateForm() {
+        var x = document.forms["UserAccounts"]["Email"].value;
+        var atpos = x.indexOf("@");
+        var dotpos = x.lastIndexOf(".");
+        if (atpos<1 || dotpos<atpos+2 || dotpos+2>=x.length) {
+            document.forms["UserAccounts"]["Email"].setCustomValidity("Please select a valid email address")
+            document.forms["UserAccounts"]["Email"].reportValidity()
+            return false;
+        }
+
+        if ((document.forms["UserAccounts"]["Profile"].value == "Select a Profile")) {
+            document.forms["UserAccounts"]["Profile"].setCustomValidity("Please select a profile")
+            document.forms["UserAccounts"]["Profile"].reportValidity()
+            return false;
+        }
+        
+        return true;
+
+    }
+
+</script>
+
+{% endblock content %}
+

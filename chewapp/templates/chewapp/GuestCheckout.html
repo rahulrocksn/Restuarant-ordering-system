@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+{% load static %}
+
+{% comment %} 
+Description: 
+Preceds GuestViewCart
+This is the Checkout Screen, where people input their CC info or apply coupon codes.
+Proceeds to GuestConfirmCart
+
+Expected Context:
+BackLink : Link to go back
+TableNo
+CartSize
+TotalPrice
+Coupons : [{"code":"couponCode", "discount_dollar": "10", "discount_percent": "5", "min_spend": "10"}] 
+
+{% endcomment %}
+
+<html>
+    <head>
+        <!-- CSS only -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="{% static 'chewapp/admin.css' %}" >
+        <title>{{Title}}</title>
+    </head>
+<body style="height: 100%; overflow:hidden">
+    <div class="container-fluid " id="MainContainer">
+        {% comment %} Top bar {% endcomment %}
+        <div class="row gy-0" style="background-color: rgb(237, 237, 237); min-height: 70px;">
+            <div class="col-4">
+                <a href="{% url 'guestCart' %}">
+                    <img src="{% static 'chewapp/guesticons/back.svg' %}" alt="Back to Cart" height="30px" style="margin:20px" >
+                </a>
+            </div>
+            <div class="col-4">
+
+            </div>
+            <div class="col-4">
+                <div class="row mt-1">
+                    <div class="col-12 text-end" style="font-size:15px; padding-right:25px">Table</div>
+                </div>
+                <div class="row ">
+                    <div class="col-12 text-end" style="font-size: 30px; font-weight: 600; padding-right:25px">{{TableNo}}</div>
+                </div>
+            </div>
+        </div>
+
+        {% comment %} Payment Content  {% endcomment %}
+        <div class="container mt-3 mb-2" style="overflow-y: auto; overflow-x:hidden;" id="DontOverScrollCart" >
+        <div class="row">
+            <h2>Complete Order</h2>
+        </div>
+        <div class="row">
+            <h4>Total {{CartSize}} items</h4>
+        </div>
+        <div class="row mt-4">
+            <h4> <img src="{% static 'chewapp/guesticons/cc.svg' %}" alt="Credit Card Icon" height="30px" style="margin-right:10px" >
+                Credit Card Details</h4>
+        </div>
+        <form id="CreditCardForm" method="post" name="CreditCardForm" onsubmit="return validateForm()">
+        {% csrf_token %}
+            <div class="row mt-2">
+                <div class="col-12">    
+                    <div class="inputgroup">
+                        <input type="text" 
+                        name="CreditCardNumber" 
+                        id="CreditCardNumberBox" 
+                        class="form-control" 
+                        placeholder="Card Number" 
+                        required>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <div class="inputgroup">
+                        <input type="text" 
+                        name="CreditCardName" 
+                        id="CreditCardNameBox" 
+                        class="form-control" 
+                        placeholder="Name on Card" 
+                        required>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <div class="input-group">
+                        <select class="form-select" id="CreditCardExpiryMonth" name="CreditCardExpiryMonth">
+                            <option selected disabled hidden>Expiry Month</option>
+                            <option value="01">Jan</option>
+                            <option value="02">Feb</option>
+                            <option value="03">Mar</option>
+                            <option value="04">Apr</option>
+                            <option value="05">May</option>
+                            <option value="06">Jun</option>
+                            <option value="07">Jul</option>
+                            <option value="08">Aug</option>
+                            <option value="09">Sep</option>
+                            <option value="10">Oct</option>
+                            <option value="11">Nov</option>
+                            <option value="12">Dec</option>
+                        </select>
+                        <span class="input-group-text">/</span>
+                        <select class="form-select" id="CreditCardExpiryYear" name="CreditCardExpiryYear">
+                            <option selected disabled hidden>Expiry Year</option>
+                            <option value="2022">22</option>
+                            <option value="2023">23</option>
+                            <option value="2024">24</option>
+                            <option value="2025">25</option>
+                            <option value="2026">26</option>
+                            <option value="2027">27</option>
+                            <option value="2028">28</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <div class="inputgroup">
+                        <input type="text" 
+                        name="CreditCardCVC" 
+                        id="CreditCardCVCBox" 
+                        class="form-control" 
+                        placeholder="CVC" 
+                        required>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+      </div>
+      {% comment %} Coupon Code and Place Order {% endcomment %}
+      <div class="container">
+        <div class="row border-bottom pb-2 pt-2 border-top" id="CouponViewRow">
+            <div class="col-11">Coupon Selection</div>
+            <div class="col-1 text-end">></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-9">Total Price:</div>
+            <div class="col-3 text-end" id="Total">$ <span id="OriginalPrice">{{TotalPrice|floatformat:2}}</span></div>
+        </div>
+        <div class="row pt-2 invisible" id="CouponDataRow">
+            <div class="col-9">
+                <img src="{% static 'chewapp/guesticons/cancel.svg' %}" height="20px" alt=""
+                data-bs-toggle="modal" data-bs-target="#DeleteCouponModal">
+                Coupon
+                <span id="CouponDiscount">Coupon</span>
+                (<span id="CouponDiscountValue">HOW MUCH</span>)
+            </div>
+            <div class="col-3 text-end" id="Total">- $ <span id="CouponDiscountAmount"></span> </div>
+        </div>
+        <div class="row pt-4">
+            <div class="col-12 d-md-block">
+                <button class="btn btn-info w-100" type="submit" form="CreditCardForm" value="Submit">Place Order $<span id="FinalCost">{{TotalPrice|floatformat:2}}</span></button>
+            </div>
+        </div>
+      </div>
+    </div> 
+    
+    {% comment %} Modal for Coupon Codes {% endcomment %}
+    <div class="modal fade" id="CouponModal" tabindex="-1" aria-labelledby="CouponModal" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="CouponModal">Coupon Selection</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              {% comment %} Get Coupons {% endcomment %}
+                <div class="container-fluid">
+
+                {% for Coupon in Coupons %}
+                <div class="row border-bottom mb-2">
+                    <div class="col">
+                        <h3>Code: {{Coupon.code}} </h3>
+                        <h4>
+                            {% if Coupon.discount_dollar %}
+                                ${{Coupon.discount_dollar}}
+                            {% else %}
+                                {{Coupon.discount_percent}}%
+                            {% endif %}
+                             OFF
+                        </h4>
+                        <h5>
+                            Min Spend: ${{Coupon.min_spend}}
+                        </h5>
+                    </div>
+                    <div class="col">
+                        {% if TotalPrice >= Coupon.min_spend %}
+                            <button class="btn btn-outline-success w-100 ApplyCoupon" data-bs-id="{{Coupon.code}}">Apply</button>
+                        {% else %}
+                            <button class="btn btn-outline-warning w-100" type="button" disabled>Minimum value not hit</button>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endfor %}
+
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% comment %} Remove Coupon Code Modal {% endcomment %}
+    <div class="modal fade" id="DeleteCouponModal" tabindex="-1" aria-labelledby="DeleteCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="DeleteCouponModalLabel">Remove Coupon?</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            Remove Coupon?
+            <div class="alert alert-danger invisible" id="DeleteCouponModalAlert" role="alert">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger" id="RemoveCoupon">Remove Coupon</button>
+        </div>
+        </div>
+    </div>
+    </div>
+  
+    </body>
+  <script>
+    function getCookie(c_name)
+    {
+        var c_value = document.cookie;
+        if (document.cookie.length > 0)
+        {
+            c_start = document.cookie.indexOf(c_name + "=");
+            if (c_start != -1)
+            {
+                c_start = c_start + c_name.length + 1;
+                c_end = document.cookie.indexOf(";", c_start);
+                if (c_end == -1) c_end = document.cookie.length;
+                return unescape(document.cookie.substring(c_start,c_end));
+            }
+        }
+        return "";
+    }
+  </script>
+  {% comment %} Toast for success msg. Used in script below. {% endcomment %}
+
+{% comment %} 
+Script for adding to cart 
+
+For add to cart button to work, it needs to have the class addToCartButton and the data-bs-id for 
+jQuery to pick up and do the magic.
+{% endcomment %}
+
+<script>
+
+    var LuhnCheck = (function()
+    {
+        var luhnArr = [0, 2, 4, 6, 8, 1, 3, 5, 7, 9];
+        return function(str)
+        {
+            var counter = 0;
+            var incNum;
+            var odd = false;
+            var temp = String(str).replace(/[^\d]/g, "");
+            if ( temp.length == 0)
+                return false;
+            for (var i = temp.length-1; i >= 0; --i)
+            {
+                incNum = parseInt(temp.charAt(i), 10);
+                counter += (odd = !odd)? incNum : luhnArr[incNum];
+            }
+            return (counter%10 == 0);
+        }
+    })();
+
+    function setInputFilter(textbox, inputFilter, errMsg) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop", "focusout"].forEach(function(event) {
+          textbox.addEventListener(event, function(e) {
+            if (inputFilter(this.value)) {
+              // Accepted value
+              if (["keydown","mousedown","focusout"].indexOf(e.type) >= 0){
+                this.classList.remove("input-error");
+                this.setCustomValidity("");
+              }
+              this.oldValue = this.value;
+              this.oldSelectionStart = this.selectionStart;
+              this.oldSelectionEnd = this.selectionEnd;
+            } else if (this.hasOwnProperty("oldValue")) {
+              // Rejected value - restore the previous one
+              this.classList.add("input-error");
+              this.setCustomValidity(errMsg);
+              this.reportValidity();
+              this.value = this.oldValue;
+              this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+            } else {
+              // Rejected value - nothing to restore
+              this.value = "";
+            }
+          });
+        });
+      }
+
+
+
+    
+
+    $(document).ready( function () {
+
+        const CouponModal = new bootstrap.Modal(document.getElementById('CouponModal'), {
+            keyboard: false
+          })
+
+        const DeleteCouponModal = new bootstrap.Modal(document.getElementById('DeleteCouponModal'), {
+            keyboard: false
+          })
+
+        setInputFilter(document.getElementById("CreditCardNumberBox"), function(value) {
+        return /^\d{0,16}$/.test(value); 
+        }, "Only 16 max digits are allowed")
+
+        setInputFilter(document.getElementById("CreditCardCVCBox"), function(value) {
+            return /^\d{0,3}$/.test(value); 
+            }, "Only 3 max digits are allowed")
+
+        
+
+        function setFinalPrice(CouponType, FinalPrice){
+            
+            if (CouponType != ""){
+                $('#FinalCost').html(FinalPrice)
+                $('#CouponDiscountValue').html(CouponType)
+    
+                let Discount = parseFloat($('#OriginalPrice').html()) - FinalPrice
+                Discount = Discount.toFixed(2)
+                $('#CouponDiscountAmount').html(Discount)
+                $("#CouponDataRow").removeClass("invisible")
+                $("#CouponDataRow").addClass("visible")
+            } else{
+                $('#FinalCost').html($('#OriginalPrice').html())
+                $('#CouponDiscountValue').html("")
+
+                $('#CouponDiscountAmount').html("")
+                $("#CouponDataRow").removeClass("visible")
+                $("#CouponDataRow").addClass("invisible")
+            }
+
+        }
+
+        $("#CouponViewRow").click(function(){
+            CouponModal.toggle()
+        })
+
+
+        $('.ApplyCoupon').click( function(){
+            
+            // Getting the ID of the button that was clicked
+            const CouponCode = $(this).data('bs-id');
+
+            // Saving the button info for modifying to show status
+            let button = $(this);
+            $(button).html("...")
+
+            let data = {
+                'CouponCode': CouponCode,
+            };
+
+            
+            $.ajax({
+              url : "{% url 'guestCartCoupon' %}",
+              headers: { "X-CSRFToken": getCookie("csrftoken")},
+              type : 'POST',
+              contentType: 'application/json',
+              data: JSON.stringify(data),
+              success : function(data){
+                $(button).html("Apply")
+                setFinalPrice(CouponCode, data.total)
+                CouponModal.toggle()
+              },
+              error: function(xhr, error){
+                $(button).html("ERROR. Please Refresh: " + xhr['responseText']);
+                console.log(xhr)
+                console.log(error)
+
+              }
+            });
+        });
+
+        $("#RemoveCoupon").click(function(){
+
+            $.ajax({
+              url : "{% url 'guestCartCoupon' %}",
+              headers: { "X-CSRFToken": getCookie("csrftoken")},
+              type : 'DELETE',
+              contentType: 'application/json',
+              success : function(data){
+                setFinalPrice("", data.total)
+                DeleteCouponModal.toggle()
+              },
+              error: function(xhr, error){
+                $("#DeleteCouponModalAlert").removeClass("invisible")
+                $("#DeleteCouponModalAlert").addClass("visible")
+                $("#DeleteCouponModalAlert").html("ERROR. Please Refresh: " + xhr['responseText']);
+              }
+            });
+        });
+
+      });
+
+    function validateForm(){
+        let month = document.forms["CreditCardForm"]["CreditCardExpiryMonth"].value == "Expiry Month"
+        let year = document.forms["CreditCardForm"]["CreditCardExpiryYear"].value == "Expiry Year"
+        let ccNo = (document.forms["CreditCardForm"]["CreditCardNumber"].value.toString().length != 16)
+        let ccNoValid = !(LuhnCheck(document.forms["CreditCardForm"]["CreditCardNumber"].value))
+        let cvv = (document.forms["CreditCardForm"]["CreditCardCVC"].value.toString().length != 3)
+        if (month | year | ccNo | cvv | ccNoValid){
+            if (month){
+                document.forms["CreditCardForm"]["CreditCardExpiryMonth"].setCustomValidity("Please select a valid Expiry Month")
+                document.forms["CreditCardForm"]["CreditCardExpiryMonth"].reportValidity()
+            }
+            if (year){
+                document.forms["CreditCardForm"]["CreditCardExpiryYear"].setCustomValidity("Please select a valid Expiry Year")
+                document.forms["CreditCardForm"]["CreditCardExpiryYear"].reportValidity()
+            }
+            if (ccNo | ccNoValid){
+                document.forms["CreditCardForm"]["CreditCardNumber"].setCustomValidity("Please enter a valid Credit Card Number")
+                document.forms["CreditCardForm"]["CreditCardNumber"].reportValidity()
+            }
+            if (cvv){
+                document.forms["CreditCardForm"]["CreditCardCVC"].setCustomValidity("Please enter a valid CVC")
+                document.forms["CreditCardForm"]["CreditCardCVC"].reportValidity()
+            }
+            
+            return false; 
+        }
+        else return true;
+    }
+
+    </script>
+
+</html>

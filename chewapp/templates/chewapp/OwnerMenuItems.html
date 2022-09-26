@@ -1,0 +1,66 @@
+{% extends "chewapp/BasicAdminTemplate.html"%}
+{% comment %} 
+Description: 
+Shows the total checkouts per menu item.
+
+
+Expected Context:
+username: "admin101",
+profile: "admin",
+tabs: getTabsOwner(request, "Menu Items"),
+activeTab: "Menu Items",
+"FoodItems": [
+            {"Name": "Pizza", "Frequency": 10},
+            {"Name": "Burger", "Frequency": 20},
+            {"Name": "Chicken", "Frequency": 30},
+        ]
+Users: Users,
+SearchTerm: SearchTerm,
+
+{% endcomment %}
+{% block content %}
+
+<div class="row border-top pt-2 mt-2">
+    <form action="" method="get">
+    <div class="col input-group">
+        {% if SearchTerm is not None %}
+        <a class="btn btn-outline-danger" href="{% url "ownerMenu"%}">
+            Cancel
+        </a>
+        {% endif %}
+            <input type="text" class="form-control" name="SearchTerm" id="SearchBox" placeholder="Search" {% if SearchTerm is not None %}value="{{SearchTerm}}"{% endif %}>
+            <button class="btn btn-outline-secondary" type="submit">
+                Search
+            </button>
+
+        </div>
+    </form>
+</div>
+<div class="row " id="DontOverScroll">
+    <div class="col">
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Food Item</th>
+                <th scope="col" class="text-end">Frequency</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for FoodItem in FoodItems %}
+                <tr>
+                  <th scope="row">{{FoodItem.Name}}</th>    
+                  <td class="text-end">{{FoodItem.Frequency}}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center">No results found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+    </div>
+</div>
+
+
+
+{% endblock content %}

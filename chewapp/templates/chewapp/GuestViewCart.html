@@ -1,0 +1,70 @@
+{% extends "chewapp/GuestViewCartTemplate.html"%} {% load static %}
+{% comment %} 
+Description: 
+The view of the cart, allows people to remove or change qty here.
+
+Expected Context:
+Table (though might be empty)
+CartItems : {
+    MenuItemID : "",
+    Name:"",
+    Qty:"",
+    Price:"",
+}
+CartSize : int
+
+{% endcomment %}
+
+{% block header %}
+
+<h1>Order List</h1>
+<h3>Total <span id="TotalSpan"> {{CartSize}} </span> items</h3>
+    
+{% endblock %}
+
+{% block content %} 
+    
+    {% for FoodItem in CartItems %}
+
+    <div class="row mb-3 border-bottom">
+        <div class="col-7 d-flex align-items-center">
+            <h5 class="align-middle">{{ FoodItem.Name }} -  ${{FoodItem.Price|floatformat:2}}</h5>
+        </div>
+        <div class="col-5 d-grid gap-2 mt-3">
+            <div class="input-group">
+                <button type="button" class="btn btn-warning ChangeQtyButton" data-bs-id="{{ FoodItem.CartItemID }}" data-bs-qty="{{ FoodItem.Qty|add:"-1" }}">-</button>
+                <input 
+                    type="text"
+                    class="form-control"
+                    name="Qty{{FoodItem.MenuItemID}}" 
+                    label="Qty{{FoodItem.MenuItemID}}" 
+                    id="Qty{{FoodItem.MenuItemID}}" 
+                    value={{FoodItem.Qty}}
+                    placeholder="Qty"
+                >
+                <button type="button" class="btn btn-success ChangeQtyButton" data-bs-id="{{ FoodItem.CartItemID }}" data-bs-qty="{{ FoodItem.Qty|add:"1" }}">+</button>
+            </div>
+            <div>
+                <button type="button" class="btn btn-danger w-100 mb-3 ChangeQtyButton" data-bs-id="{{ FoodItem.CartItemID }}" data-bs-qty="0" >Remove</button>
+            </div>
+        </div>
+    </div>
+
+    {% endfor %} 
+
+{% endblock %}
+
+{% block total %}
+
+
+    <div class="row pt-4 pb-5 p-3 border-top" style="background-color: rgb(237, 237, 237)">
+        <div class="col-7">
+            <h2>Total: ${{TotalPrice|floatformat:2}}</h2>
+        </div>
+        <div class="col-5">
+            <a href="{% url "guestCartSubmit" %}" type="button" class=" {% if CartSize == 0 %} disabled {% endif %} btn btn-success w-100 btn-lg align-right">Checkout</a>
+        </div>
+    </div>
+
+
+{% endblock total %}

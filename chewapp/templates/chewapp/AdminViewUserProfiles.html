@@ -1,0 +1,135 @@
+{% extends "chewapp/BasicAdminTemplate.html"%}
+
+{% comment %} 
+Description: 
+List all User Profiles
+
+Expected Context:
+username
+profile : "admin"
+tabs : getTabsAdmin(request, "User Profiles")
+activeTab: "User Profiles"
+searchBar: True
+createButton: request.build_absolute_uri("/admin/profiles/create")
+UserProfiles: [{
+    "id" : 1,
+    "name" : "admin",
+}]
+"searchBarHome": request.build_absolute_uri("/admin/profiles"),
+"searchBarLink": request.build_absolute_uri("/admin/profiles"),
+
+{% endcomment %}
+
+{% block content %}
+
+<div class="container-md" style="overflow-y: auto; overflow-x:hidden;" id="DontOverScroll">
+
+    {% if UserProfiles %}
+    
+        {% for Profile in UserProfiles %}
+        
+        <div class="row pt-3 pb-3 border-bottom">
+            <div class="col-8">
+                <div class="row">
+                    <div class="col-12">
+                        <h4>{{Profile.name}}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="row">
+                    <div class="col-12">
+                        <a href="modify/{{Profile.id}}" class="btn btn-outline-primary w-100">✏️ Modify</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 mt-2">
+                        <button
+                        type="button" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#DeleteModal" 
+                        class="btn btn-outline-danger w-100" 
+                        data-bs-id="{{Profile.id}}" 
+                        data-bs-name="{{Profile.name}}" 
+                        >
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% endfor %}
+
+    {% else %}
+
+    {% endif %}
+
+</div>
+
+<div class="modal fade" id="DeleteModal" tabindex="-1" aria-labelledby="DeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="DeleteModalLabel">Delete Profile?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            Delete profile "<span id="profileName"></span>"?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-danger" id="DeleteProfileButton">Delete Profile</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ 
+<script>
+    $(document).ready(function(){
+        $('#DeleteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var id = button.data('bs-id') // Extract info from data-* attributes
+            var name = button.data('bs-name') // Extract info from data-* attributes
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+            var modal = $(this)
+            modal.find('#profileName').text(name)
+            modal.find('button.btn-danger').attr('data-bs-id', id)
+        })
+
+        $("#DeleteProfileButton").click(function(){
+            let button = $(this)
+            var id = $(this).attr('data-bs-id')
+            $.ajax({
+                url: "{% url 'adminProfiles' %}modify/"+id,
+                headers: { "X-CSRFToken": getCookie("csrftoken")},
+                type: "DELETE",
+                success: function(data){
+                    button.removeClass('btn-danger')
+                    button.addClass('btn-success')
+                    button.text('✔️ Deleted')
+                    setTimeout(function(){
+                        location.reload()
+                    }, 500)
+                },
+                error: function(data){
+                    button.removeClass('btn-danger')
+                    button.addClass('btn-warning')
+                    button.text('Error. Please refresh and try again')
+                    console.log(data)
+                }
+            })
+        })
+
+
+    })
+
+</script> 
+
+
+{% endblock content %}
+
+
+

@@ -1,0 +1,201 @@
+{% extends "chewapp/BasicAdminTemplate.html"%}
+
+{% comment %} 
+Description: 
+List all User Accounts
+
+Expected Context:
+username
+profile : "admin"
+tabs : getTabsAdmin(request, "Users")
+activeTab: "Users"
+searchBar: True
+createButton: request.build_absolute_uri("/admin/accounts/create")
+UserAccounts: [{
+    "id" : 1,
+    "username" : "admin",
+    "email" : "someemail@gmail.com"
+    "is_suspended" : false,
+}]
+"searchBarHome": request.build_absolute_uri("/admin/accounts")
+searchBarLink: request.build_absolute_uri("/admin/accounts")
+
+{% endcomment %}
+
+{% block content %}
+
+<div class="container-md" style="overflow-y: auto; overflow-x:hidden;" id="DontOverScroll">
+
+    {% if UserAccounts %}
+    
+        {% for Account in UserAccounts %}
+        
+        <div class="row pt-3 pb-3 border-bottom">
+            <div class="col-8">
+                <div class="row">
+                    <div class="col-12">
+                        <h4>Username: {{ Account.username }}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <h4>Email: {{ Account.email }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                {% if not Account.is_suspended %}
+                <div class="row">
+                    <div class="col-12">
+                        <a href="modify/{{Account.username}}" class="btn btn-outline-primary w-100">✏️ Modify</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 mt-2">
+                        <button class="btn btn-outline-danger w-100" 
+                        type="button" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#SuspendModal" 
+                        data-bs-id="{{Account.username}}" 
+                        data-bs-name="{{Account.username}}">🗑️ Suspend</button>
+                    </div>
+                </div>
+                {% else %}
+                <div class="row">
+                    <div class="col-12">
+                        <button class="btn btn-outline-warning w-100" 
+                        type="button" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#UnsuspendModal" 
+                        data-bs-id="{{Account.username}}" 
+                        data-bs-name="{{Account.username}}">🔓 Unsuspend</button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% endfor %}
+
+    {% else %}
+
+    {% endif %}
+
+    {% comment %} Suspend Modal {% endcomment %}
+    <div class="modal fade" id="SuspendModal" tabindex="-1" aria-labelledby="SuspendModal" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="SuspendModalLabel">Suspend User?</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Suspend User <span id="suspendName"></span>?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-danger" id="SuspendUserButton">Suspend User</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    {% comment %} Unsuspend Modal {% endcomment %}
+    <div class="modal fade" id="UnsuspendModal" tabindex="-1" aria-labelledby="UnsuspendModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="UnsuspendModalLabel">Unsuspend User?</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Unsuspend user <span id="unsuspendName"></span>?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" id="UnsuspendUserButton">Unsuspend user</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+<script>
+    $(document).ready(function(){
+        $('#SuspendModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var id = button.data('bs-id') // Extract info from data-* attributes
+            var name = button.data('bs-name') // Extract info from data-* attributes
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+            var modal = $(this)
+            modal.find('#suspendName').text(name)
+            modal.find('button.btn-danger').attr('data-bs-id', id)
+        })
+
+        $("#SuspendUserButton").click(function(){
+            let button = $(this)
+            var id = $(this).attr('data-bs-id')
+            $.ajax({
+                url: "{% url 'adminAccounts' %}modify/" + id,
+                headers: { "X-CSRFToken": getCookie("csrftoken")},
+                type: "DELETE",
+                success: function(data){
+                    button.removeClass('btn-danger')
+                    button.addClass('btn-success')
+                    button.text('✔️ Suspended')
+                    setTimeout(function(){
+                        location.reload()
+                    }, 500)
+                },
+                error: function(data){
+                    button.removeClass('btn-danger')
+                    button.addClass('btn-warning')
+                    button.text('Error. Please refresh and try again')
+                    console.log(data)
+                }
+            })
+        })
+
+        $('#UnsuspendModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var id = button.data('bs-id') // Extract info from data-* attributes
+            var name = button.data('bs-name') // Extract info from data-* attributes
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+            var modal = $(this)
+            modal.find('#unsuspendName').text(name)
+            modal.find('button.btn-primary').attr('data-bs-id', id)
+        })
+
+        $("#UnsuspendUserButton").click(function(){
+            let button = $(this)
+            var id = $(this).attr('data-bs-id')
+            $.ajax({
+                url: "{% url 'adminAccounts' %}modify/" + id,
+                headers: { "X-CSRFToken": getCookie("csrftoken")},
+                type: "PUT",
+                success: function(data){
+                    button.text('✔️ Unsuspended')
+                    setTimeout(function(){
+                        location.reload()
+                    }, 500)
+                },
+                error: function(data){
+                    button.removeClass('btn-primary')
+                    button.addClass('btn-warning')
+                    button.text('Error. Please refresh and try again')
+                    console.log(data)
+                }
+            })
+        })
+
+
+    })
+
+</script>
+
+{% endblock content %}
+
+
+
